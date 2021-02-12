@@ -14,9 +14,9 @@ func normRGBToHLS(r, g, b float64) *HLS {
 	} else if maxC == r {
 		h = (g - b) / delta
 	} else if maxC == g {
-		h = (b - r) / delta + 2
+		h = (b-r)/delta + 2
 	} else if maxC == b {
-		h = (r - g) / delta + 4
+		h = (r-g)/delta + 4
 	}
 	h *= 60
 	for h < 360 {
@@ -30,7 +30,7 @@ func normRGBToHLS(r, g, b float64) *HLS {
 	if l == 0 || l == 1 {
 		s = 0
 	} else {
-		s = (maxC - l) / math.Min(l, 1 - l)
+		s = (maxC - l) / math.Min(l, 1-l)
 	}
 
 	return NewHLS(h, l, s)
@@ -45,11 +45,11 @@ func hueToRGB(p, q, t float64) float64 {
 	}
 	switch {
 	case t < 1.0/6:
-		return p + (q - p) * 6 * t
+		return p + (q-p)*6*t
 	case t >= 1.0/6 && t < 1.0/2:
 		return q
 	case t >= 1.0/2 && t < 2.0/3:
-		return p + (q - p) * (2.0/3 - t) * 6
+		return p + (q-p)*(2.0/3-t)*6
 	default:
 		return p
 	}
@@ -64,16 +64,16 @@ func hlsToNormRGB(hls *HLS) (r, g, b float64) {
 	if hls.L() < 0.5 {
 		q = hls.L() * (1 + hls.S())
 	} else {
-		q = hls.L() + hls.S() - hls.L() * hls.S()
+		q = hls.L() + hls.S() - hls.L()*hls.S()
 	}
-	p = 2 * hls.L() - q
-	return hueToRGB(p, q, hN + 1.0 / 3), hueToRGB(p, q, hN), hueToRGB(p, q, hN - 1.0 / 3)
+	p = 2*hls.L() - q
+	return hueToRGB(p, q, hN+1.0/3), hueToRGB(p, q, hN), hueToRGB(p, q, hN-1.0/3)
 }
 
 func cmykToNormRGB(cmyk *CMYK) (r, g, b float64) {
 	return (1 - cmyk.C()) * (1 - cmyk.K()),
-	       (1 - cmyk.M()) * (1 - cmyk.K()),
-		   (1 - cmyk.Y()) * (1 - cmyk.K())
+		(1 - cmyk.M()) * (1 - cmyk.K()),
+		(1 - cmyk.Y()) * (1 - cmyk.K())
 }
 
 func normRGBToCMYK(r, g, b float64) *CMYK {
@@ -81,10 +81,10 @@ func normRGBToCMYK(r, g, b float64) *CMYK {
 	if key == 1.0 {
 		return NewCMYK(0, 0, 0, 1)
 	} else {
-		return NewCMYK((1 - r - key) / (1 - key),
-					   (1 - g - key) / (1 - key),
-					   (1 - b - key) / (1 - key),
-					   key)
+		return NewCMYK((1-r-key)/(1-key),
+			(1-g-key)/(1-key),
+			(1-b-key)/(1-key),
+			key)
 	}
 }
 

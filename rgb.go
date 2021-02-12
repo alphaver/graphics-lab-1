@@ -29,5 +29,5 @@ func (rgb RGB) EqualTo(other RGB) bool {
 }
 
 func DenormalizeRGB(r, g, b float64) RGB {
-	return NewRGB(byte(math.Round(r * 255)), byte(math.Round(g * 255)), byte(math.Round(b * 255)))
+	return NewRGB(byte(math.Round(r*255)), byte(math.Round(g*255)), byte(math.Round(b*255)))
 }

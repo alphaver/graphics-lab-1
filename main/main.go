@@ -10,26 +10,26 @@ import (
 )
 
 var (
-	rgbColor lab.RGB
+	rgbColor  lab.RGB
 	cmykColor *lab.CMYK
-	hlsColor *lab.HLS
+	hlsColor  *lab.HLS
 
-	rgbChangedProg bool
+	rgbChangedProg  bool
 	cmykChangedProg bool
-	hlsChangedProg bool
+	hlsChangedProg  bool
 
-	sample *walk.ImageView
-	rgbRTE, rgbGTE, rgbBTE *walk.NumberEdit
+	sample                             *walk.ImageView
+	rgbRTE, rgbGTE, rgbBTE             *walk.NumberEdit
 	cmykCTE, cmykMTE, cmykYTE, cmykKTE *walk.NumberEdit
-	hlsHTE, hlsLTE, hlsSTE *walk.NumberEdit
-	rgbRS, rgbGS, rgbBS *walk.Slider
-	cmykCS, cmykMS, cmykYS, cmykKS *walk.Slider
-	hlsHS, hlsLS, hlsSS *walk.Slider
+	hlsHTE, hlsLTE, hlsSTE             *walk.NumberEdit
+	rgbRS, rgbGS, rgbBS                *walk.Slider
+	cmykCS, cmykMS, cmykYS, cmykKS     *walk.Slider
+	hlsHS, hlsLS, hlsSS                *walk.Slider
 
-	chooseColor = win.CHOOSECOLOR {
-		LStructSize: uint32(unsafe.Sizeof(win.CHOOSECOLOR{})),
+	chooseColor = win.CHOOSECOLOR{
+		LStructSize:  uint32(unsafe.Sizeof(win.CHOOSECOLOR{})),
 		LpCustColors: &[16]win.COLORREF{},
-		Flags: win.CC_ANYCOLOR | win.CC_FULLOPEN | win.CC_RGBINIT,
+		Flags:        win.CC_ANYCOLOR | win.CC_FULLOPEN | win.CC_RGBINIT,
 	}
 )
 
@@ -83,7 +83,7 @@ func updateAll() {
 	updateSampleSliders()
 }
 
-func progChangeGuard(handler func()){
+func progChangeGuard(handler func()) {
 	rgbChangedProg = true
 	cmykChangedProg = true
 	hlsChangedProg = true
@@ -124,7 +124,7 @@ func fetchCMYKFromInputs() {
 		return
 	}
 	progChangeGuard(func() {
-		newCMYK := lab.NewCMYK(cmykCTE.Value() / 100, cmykMTE.Value() / 100, cmykYTE.Value() / 100, cmykKTE.Value() / 100)
+		newCMYK := lab.NewCMYK(cmykCTE.Value()/100, cmykMTE.Value()/100, cmykYTE.Value()/100, cmykKTE.Value()/100)
 		updateColors(newCMYK)
 		updateRGBText()
 		updateHLSText()
@@ -137,10 +137,10 @@ func fetchCMYKFromSlider() {
 		return
 	}
 	progChangeGuard(func() {
-		newCMYK := lab.NewCMYK(float64(cmykCS.Value()) / 100,
-					  		   float64(cmykMS.Value()) / 100,
-							   float64(cmykYS.Value()) / 100,
-							   float64(cmykKS.Value()) / 100)
+		newCMYK := lab.NewCMYK(float64(cmykCS.Value())/100,
+			float64(cmykMS.Value())/100,
+			float64(cmykYS.Value())/100,
+			float64(cmykKS.Value())/100)
 		updateColors(newCMYK)
 		updateAll()
 	})
@@ -151,7 +151,7 @@ func fetchHLSFromInputs() {
 		return
 	}
 	progChangeGuard(func() {
-		newHLS := lab.NewHLS(hlsHTE.Value(), hlsLTE.Value() / 100, hlsSTE.Value() / 100)
+		newHLS := lab.NewHLS(hlsHTE.Value(), hlsLTE.Value()/100, hlsSTE.Value()/100)
 		updateColors(newHLS)
 		updateRGBText()
 		updateCMYKText()
@@ -164,7 +164,7 @@ func fetchHLSFromSlider() {
 		return
 	}
 	progChangeGuard(func() {
-		newHLS := lab.NewHLS(float64(hlsHS.Value()), float64(hlsLS.Value()) / 100, float64(hlsSS.Value()) / 100)
+		newHLS := lab.NewHLS(float64(hlsHS.Value()), float64(hlsLS.Value())/100, float64(hlsSS.Value())/100)
 		updateColors(newHLS)
 		updateAll()
 	})
@@ -185,229 +185,229 @@ func main() {
 						Title:  "Chosen color and color picking (via palette)",
 						Layout: HBox{},
 						Children: []Widget{
-									Label{Text: "Color sample (click it to open the palette):"},
-									ImageView{
-										AssignTo: &sample,
-										Background: SolidColorBrush{Color: walk.RGB(0,0,0)},
-										MinSize:  Size{Width: 100, Height: 100},
-										MaxSize:  Size{Width: 100, Height: 100},
-										OnMouseDown: func(x, y int, button walk.MouseButton) {
-											if button == walk.LeftButton {
-												chooseColor.RgbResult = win.COLORREF(rgbColor)
-												if win.ChooseColor(&chooseColor) {
-													progChangeGuard(func() {
-														updateColors(lab.RGB(chooseColor.RgbResult))
-														updateAll()
-													})
-												}
-											}
-										},
-									},
+							Label{Text: "Color sample (click it to open the palette):"},
+							ImageView{
+								AssignTo:   &sample,
+								Background: SolidColorBrush{Color: walk.RGB(0, 0, 0)},
+								MinSize:    Size{Width: 100, Height: 100},
+								MaxSize:    Size{Width: 100, Height: 100},
+								OnMouseDown: func(x, y int, button walk.MouseButton) {
+									if button == walk.LeftButton {
+										chooseColor.RgbResult = win.COLORREF(rgbColor)
+										if win.ChooseColor(&chooseColor) {
+											progChangeGuard(func() {
+												updateColors(lab.RGB(chooseColor.RgbResult))
+												updateAll()
+											})
+										}
+									}
 								},
 							},
+						},
+					},
 					GroupBox{
 						Title:  "Color picking using different models",
 						Layout: HBox{},
+						Children: []Widget{
+							GroupBox{
+								Title:  "RGB",
+								Layout: Grid{Columns: 2},
 								Children: []Widget{
-									GroupBox{
-										Title:  "RGB",
-										Layout: Grid{Columns: 2},
-										Children: []Widget{
-											Label{Text: "Red"},
-											NumberEdit{
-												AssignTo:       &rgbRTE,
-												MinValue:       0,
-												MaxValue:       255,
-												Value: float64(rgbColor.R()),
-												Decimals:       0,
-												OnValueChanged: fetchRGBFromInputs,
-											},
-											Slider{
-												AssignTo:       &rgbRS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       255,
-												Value: float64(rgbColor.R()),
-												OnValueChanged: fetchRGBFromSlider,
-											},
-
-											Label{Text: "Green"},
-											NumberEdit{
-												AssignTo:       &rgbGTE,
-												MinValue:       0,
-												MaxValue:       255,
-												Value: float64(rgbColor.G()),
-												Decimals:       0,
-												OnValueChanged: fetchRGBFromInputs,
-											},
-											Slider{
-												AssignTo:       &rgbGS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       255,
-												Value: float64(rgbColor.G()),
-												OnValueChanged: fetchRGBFromSlider,
-											},
-
-											Label{Text: "Blue"},
-											NumberEdit{
-												AssignTo:       &rgbBTE,
-												MinValue:       0,
-												MaxValue:       255,
-												Value: float64(rgbColor.B()),
-												Decimals:       0,
-												OnValueChanged: fetchRGBFromInputs,
-											},
-											Slider{
-												AssignTo:       &rgbBS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       255,
-												Value: float64(rgbColor.B()),
-												OnValueChanged: fetchRGBFromSlider,
-											},
-										},
+									Label{Text: "Red"},
+									NumberEdit{
+										AssignTo:       &rgbRTE,
+										MinValue:       0,
+										MaxValue:       255,
+										Value:          float64(rgbColor.R()),
+										Decimals:       0,
+										OnValueChanged: fetchRGBFromInputs,
 									},
-									GroupBox{
-										Title:  "CMYK",
-										Layout: Grid{Columns: 2},
-										Children: []Widget{
-											Label{Text: "Cyan (%)"},
-											NumberEdit{
-												AssignTo:       &cmykCTE,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: cmykColor.C() * 100,
-												Decimals:       5,
-												OnValueChanged: fetchCMYKFromInputs,
-											},
-											Slider{
-												AssignTo:       &cmykCS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: int(cmykColor.C() * 100),
-												OnValueChanged: fetchCMYKFromSlider,
-											},
-
-											Label{Text: "Magenta (%)"},
-											NumberEdit{
-												AssignTo:       &cmykMTE,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: cmykColor.M() * 100,
-												Decimals:       5,
-												OnValueChanged: fetchCMYKFromInputs,
-											},
-											Slider{
-												AssignTo:       &cmykMS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: int(cmykColor.M() * 100),
-												OnValueChanged: fetchCMYKFromSlider,
-											},
-
-											Label{Text: "Yellow (%)"},
-											NumberEdit{
-												AssignTo:       &cmykYTE,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: cmykColor.Y() * 100,
-												Decimals:       5,
-												OnValueChanged: fetchCMYKFromInputs,
-											},
-											Slider{
-												AssignTo:       &cmykYS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: cmykColor.Y() * 100,
-												OnValueChanged: fetchCMYKFromSlider,
-											},
-
-											Label{Text: "Key (%)"},
-											NumberEdit{
-												AssignTo:       &cmykKTE,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: cmykColor.K() * 100,
-												Decimals:       5,
-												OnValueChanged: fetchCMYKFromInputs,
-											},
-											Slider{
-												AssignTo:       &cmykKS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: int(cmykColor.K() * 100),
-												OnValueChanged: fetchCMYKFromSlider,
-											},
-										},
+									Slider{
+										AssignTo:       &rgbRS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       255,
+										Value:          float64(rgbColor.R()),
+										OnValueChanged: fetchRGBFromSlider,
 									},
-									GroupBox{
-										Title:  "HLS",
-										Layout: Grid{Columns: 2},
-										Children: []Widget{
-											Label{Text: "Hue (˚)"},
-											NumberEdit{
-												AssignTo:       &hlsHTE,
-												MinValue:       0,
-												MaxValue:       360,
-												Value: hlsColor.H(),
-												Decimals:       5,
-												OnValueChanged: fetchHLSFromInputs,
-											},
-											Slider{
-												AssignTo:       &hlsHS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       360,
-												Value: int(hlsColor.H()),
-												OnValueChanged: fetchHLSFromSlider,
-											},
 
-											Label{Text: "Lightness (%)"},
-											NumberEdit{
-												AssignTo:       &hlsLTE,
-												MinValue:       0,
-												MaxValue:       100,
-												Decimals:       5,
-												Value: hlsColor.L() * 100,
-												OnValueChanged: fetchHLSFromInputs,
-											},
-											Slider{
-												AssignTo:       &hlsLS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: hlsColor.L() * 100,
-												OnValueChanged: fetchHLSFromSlider,
-											},
+									Label{Text: "Green"},
+									NumberEdit{
+										AssignTo:       &rgbGTE,
+										MinValue:       0,
+										MaxValue:       255,
+										Value:          float64(rgbColor.G()),
+										Decimals:       0,
+										OnValueChanged: fetchRGBFromInputs,
+									},
+									Slider{
+										AssignTo:       &rgbGS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       255,
+										Value:          float64(rgbColor.G()),
+										OnValueChanged: fetchRGBFromSlider,
+									},
 
-											Label{Text: "Saturation (%)"},
-											NumberEdit{
-												AssignTo:       &hlsSTE,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: hlsColor.S() * 100,
-												Decimals:       5,
-												OnValueChanged: fetchHLSFromInputs,
-											},
-											Slider{
-												AssignTo:       &hlsSS,
-												ColumnSpan:     2,
-												MinValue:       0,
-												MaxValue:       100,
-												Value: hlsColor.S() * 100,
-												OnValueChanged: fetchHLSFromSlider,
-											},
-										},
+									Label{Text: "Blue"},
+									NumberEdit{
+										AssignTo:       &rgbBTE,
+										MinValue:       0,
+										MaxValue:       255,
+										Value:          float64(rgbColor.B()),
+										Decimals:       0,
+										OnValueChanged: fetchRGBFromInputs,
+									},
+									Slider{
+										AssignTo:       &rgbBS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       255,
+										Value:          float64(rgbColor.B()),
+										OnValueChanged: fetchRGBFromSlider,
+									},
+								},
+							},
+							GroupBox{
+								Title:  "CMYK",
+								Layout: Grid{Columns: 2},
+								Children: []Widget{
+									Label{Text: "Cyan (%)"},
+									NumberEdit{
+										AssignTo:       &cmykCTE,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          cmykColor.C() * 100,
+										Decimals:       5,
+										OnValueChanged: fetchCMYKFromInputs,
+									},
+									Slider{
+										AssignTo:       &cmykCS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          int(cmykColor.C() * 100),
+										OnValueChanged: fetchCMYKFromSlider,
+									},
+
+									Label{Text: "Magenta (%)"},
+									NumberEdit{
+										AssignTo:       &cmykMTE,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          cmykColor.M() * 100,
+										Decimals:       5,
+										OnValueChanged: fetchCMYKFromInputs,
+									},
+									Slider{
+										AssignTo:       &cmykMS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          int(cmykColor.M() * 100),
+										OnValueChanged: fetchCMYKFromSlider,
+									},
+
+									Label{Text: "Yellow (%)"},
+									NumberEdit{
+										AssignTo:       &cmykYTE,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          cmykColor.Y() * 100,
+										Decimals:       5,
+										OnValueChanged: fetchCMYKFromInputs,
+									},
+									Slider{
+										AssignTo:       &cmykYS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          cmykColor.Y() * 100,
+										OnValueChanged: fetchCMYKFromSlider,
+									},
+
+									Label{Text: "Key (%)"},
+									NumberEdit{
+										AssignTo:       &cmykKTE,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          cmykColor.K() * 100,
+										Decimals:       5,
+										OnValueChanged: fetchCMYKFromInputs,
+									},
+									Slider{
+										AssignTo:       &cmykKS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          int(cmykColor.K() * 100),
+										OnValueChanged: fetchCMYKFromSlider,
+									},
+								},
+							},
+							GroupBox{
+								Title:  "HLS",
+								Layout: Grid{Columns: 2},
+								Children: []Widget{
+									Label{Text: "Hue (˚)"},
+									NumberEdit{
+										AssignTo:       &hlsHTE,
+										MinValue:       0,
+										MaxValue:       360,
+										Value:          hlsColor.H(),
+										Decimals:       5,
+										OnValueChanged: fetchHLSFromInputs,
+									},
+									Slider{
+										AssignTo:       &hlsHS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       360,
+										Value:          int(hlsColor.H()),
+										OnValueChanged: fetchHLSFromSlider,
+									},
+
+									Label{Text: "Lightness (%)"},
+									NumberEdit{
+										AssignTo:       &hlsLTE,
+										MinValue:       0,
+										MaxValue:       100,
+										Decimals:       5,
+										Value:          hlsColor.L() * 100,
+										OnValueChanged: fetchHLSFromInputs,
+									},
+									Slider{
+										AssignTo:       &hlsLS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          hlsColor.L() * 100,
+										OnValueChanged: fetchHLSFromSlider,
+									},
+
+									Label{Text: "Saturation (%)"},
+									NumberEdit{
+										AssignTo:       &hlsSTE,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          hlsColor.S() * 100,
+										Decimals:       5,
+										OnValueChanged: fetchHLSFromInputs,
+									},
+									Slider{
+										AssignTo:       &hlsSS,
+										ColumnSpan:     2,
+										MinValue:       0,
+										MaxValue:       100,
+										Value:          hlsColor.S() * 100,
+										OnValueChanged: fetchHLSFromSlider,
 									},
 								},
 							},
 						},
 					},
+				},
+			},
 		},
 	}
 
