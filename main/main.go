@@ -9,6 +9,10 @@ import (
 	"unsafe"
 )
 
+const (
+	ImpreciseRGBWarn = "Warning: The RGB color can be imprecise due to rounding"
+)
+
 var (
 	rgbColor  lab.RGB
 	cmykColor *lab.CMYK
@@ -25,6 +29,7 @@ var (
 	rgbRS, rgbGS, rgbBS                *walk.Slider
 	cmykCS, cmykMS, cmykYS, cmykKS     *walk.Slider
 	hlsHS, hlsLS, hlsSS                *walk.Slider
+	mainSB                             *walk.StatusBarItem
 
 	chooseColor = win.CHOOSECOLOR{
 		LStructSize:  uint32(unsafe.Sizeof(win.CHOOSECOLOR{})),
@@ -105,6 +110,7 @@ func fetchRGBFromInputs() {
 		updateCMYKText()
 		updateHLSText()
 		updateSampleSliders()
+		_ = mainSB.SetText("")
 	})
 }
 
@@ -116,6 +122,7 @@ func fetchRGBFromSlider() {
 		newRGB := lab.NewRGB(byte(rgbRS.Value()), byte(rgbGS.Value()), byte(rgbBS.Value()))
 		updateColors(newRGB)
 		updateAll()
+		_ = mainSB.SetText("")
 	})
 }
 
@@ -129,6 +136,7 @@ func fetchCMYKFromInputs() {
 		updateRGBText()
 		updateHLSText()
 		updateSampleSliders()
+		_ = mainSB.SetText(ImpreciseRGBWarn)
 	})
 }
 
@@ -143,6 +151,7 @@ func fetchCMYKFromSlider() {
 			float64(cmykKS.Value())/100)
 		updateColors(newCMYK)
 		updateAll()
+		_ = mainSB.SetText(ImpreciseRGBWarn)
 	})
 }
 
@@ -156,6 +165,7 @@ func fetchHLSFromInputs() {
 		updateRGBText()
 		updateCMYKText()
 		updateSampleSliders()
+		_ = mainSB.SetText(ImpreciseRGBWarn)
 	})
 }
 
@@ -167,11 +177,14 @@ func fetchHLSFromSlider() {
 		newHLS := lab.NewHLS(float64(hlsHS.Value()), float64(hlsLS.Value())/100, float64(hlsSS.Value())/100)
 		updateColors(newHLS)
 		updateAll()
+		_ = mainSB.SetText(ImpreciseRGBWarn)
 	})
 }
 
 func main() {
-	updateColors(rgbColor)
+	progChangeGuard(func() {
+		updateColors(rgbColor)
+	})
 
 	mw := MainWindow{
 		Title:  "Computer Graphics Lab 1",
@@ -227,7 +240,7 @@ func main() {
 										ColumnSpan:     2,
 										MinValue:       0,
 										MaxValue:       255,
-										Value:          float64(rgbColor.R()),
+										Value:          rgbColor.R(),
 										OnValueChanged: fetchRGBFromSlider,
 									},
 
@@ -245,7 +258,7 @@ func main() {
 										ColumnSpan:     2,
 										MinValue:       0,
 										MaxValue:       255,
-										Value:          float64(rgbColor.G()),
+										Value:          rgbColor.G(),
 										OnValueChanged: fetchRGBFromSlider,
 									},
 
@@ -263,7 +276,7 @@ func main() {
 										ColumnSpan:     2,
 										MinValue:       0,
 										MaxValue:       255,
-										Value:          float64(rgbColor.B()),
+										Value:          rgbColor.B(),
 										OnValueChanged: fetchRGBFromSlider,
 									},
 								},
@@ -322,7 +335,7 @@ func main() {
 										ColumnSpan:     2,
 										MinValue:       0,
 										MaxValue:       100,
-										Value:          cmykColor.Y() * 100,
+										Value:          int(cmykColor.Y() * 100),
 										OnValueChanged: fetchCMYKFromSlider,
 									},
 
@@ -381,7 +394,7 @@ func main() {
 										ColumnSpan:     2,
 										MinValue:       0,
 										MaxValue:       100,
-										Value:          hlsColor.L() * 100,
+										Value:          int(hlsColor.L() * 100),
 										OnValueChanged: fetchHLSFromSlider,
 									},
 
@@ -399,7 +412,7 @@ func main() {
 										ColumnSpan:     2,
 										MinValue:       0,
 										MaxValue:       100,
-										Value:          hlsColor.S() * 100,
+										Value:          int(hlsColor.S() * 100),
 										OnValueChanged: fetchHLSFromSlider,
 									},
 								},
@@ -407,6 +420,12 @@ func main() {
 						},
 					},
 				},
+			},
+		},
+
+		StatusBarItems: []StatusBarItem{
+			{
+				AssignTo: &mainSB,
 			},
 		},
 	}
